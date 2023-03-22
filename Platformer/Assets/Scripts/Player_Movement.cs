@@ -24,7 +24,10 @@ public class Player_Movement : MonoBehaviour
     void Update()
     {
         horDirection = ReadHorDirection();
-        isJumpinginput = ReadJumpInput();
+        if (ReadJumpInput()) 
+        {
+            isJumpinginput = true;
+        }
     }
 
     private void FixedUpdate()
