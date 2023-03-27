@@ -14,10 +14,11 @@ public class Character_Movements : MonoBehaviour
     [Header("Movement")]
     [SerializeField] Vector3 _CurrentMovement;
     [Range (0,100)] [SerializeField] float speed = 20.0f;
+    [SerializeField] float initialSpeed;
     [Range (0,100)] [SerializeField] float jumpForce = 20.0f;
     [SerializeField] bool canJunp;
+    [SerializeField] bool isSprinting;
 
-    [Header("SetUp")]
     [SerializeField] const float maxDistance = 0f;
     [SerializeField] const float minJumpDistance = 0.5f;
 
@@ -36,6 +37,8 @@ public class Character_Movements : MonoBehaviour
         }
 
         canJunp = true;
+        isSprinting = false;
+        initialSpeed = speed;
     }
 
     private void Update()
@@ -51,6 +54,15 @@ public class Character_Movements : MonoBehaviour
             rigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             canJunp = false;
         }
+
+        if (isSprinting)
+        {
+            speed = initialSpeed * 2;
+        }
+        else 
+        {
+            speed = initialSpeed;
+        }
     }
 
     public void OnMove(InputValue input)
@@ -63,6 +75,12 @@ public class Character_Movements : MonoBehaviour
     public void OnJump()
     {
         canJunp = true;   
+    }
+
+    public void OnSprint(InputValue input) 
+    {
+        Debug.Log(input.isPressed);
+        isSprinting = input.isPressed;
     }
 
     private void OnDrawGizmos()

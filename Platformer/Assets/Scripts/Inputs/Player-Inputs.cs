@@ -74,6 +74,15 @@ namespace Inputs
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Sprint"",
+                    ""type"": ""Value"",
+                    ""id"": ""7bc3584c-33eb-46eb-8a14-d8e4f474343f"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -197,6 +206,28 @@ namespace Inputs
                     ""action"": ""Jump"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""190bee59-8449-4e91-ba2f-d7e1f89de4a3"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Sprint"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""71d57ad4-cb11-4957-b292-bbe9d33c4fe6"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Sprint"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -210,6 +241,7 @@ namespace Inputs
             m_World = asset.FindActionMap("World", throwIfNotFound: true);
             m_World_Move = m_World.FindAction("Move", throwIfNotFound: true);
             m_World_Jump = m_World.FindAction("Jump", throwIfNotFound: true);
+            m_World_Sprint = m_World.FindAction("Sprint", throwIfNotFound: true);
         }
 
         public void Dispose()
@@ -319,12 +351,14 @@ namespace Inputs
         private List<IWorldActions> m_WorldActionsCallbackInterfaces = new List<IWorldActions>();
         private readonly InputAction m_World_Move;
         private readonly InputAction m_World_Jump;
+        private readonly InputAction m_World_Sprint;
         public struct WorldActions
         {
             private @Player_Inputs m_Wrapper;
             public WorldActions(@Player_Inputs wrapper) { m_Wrapper = wrapper; }
             public InputAction @Move => m_Wrapper.m_World_Move;
             public InputAction @Jump => m_Wrapper.m_World_Jump;
+            public InputAction @Sprint => m_Wrapper.m_World_Sprint;
             public InputActionMap Get() { return m_Wrapper.m_World; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -340,6 +374,9 @@ namespace Inputs
                 @Jump.started += instance.OnJump;
                 @Jump.performed += instance.OnJump;
                 @Jump.canceled += instance.OnJump;
+                @Sprint.started += instance.OnSprint;
+                @Sprint.performed += instance.OnSprint;
+                @Sprint.canceled += instance.OnSprint;
             }
 
             private void UnregisterCallbacks(IWorldActions instance)
@@ -350,6 +387,9 @@ namespace Inputs
                 @Jump.started -= instance.OnJump;
                 @Jump.performed -= instance.OnJump;
                 @Jump.canceled -= instance.OnJump;
+                @Sprint.started -= instance.OnSprint;
+                @Sprint.performed -= instance.OnSprint;
+                @Sprint.canceled -= instance.OnSprint;
             }
 
             public void RemoveCallbacks(IWorldActions instance)
@@ -375,6 +415,7 @@ namespace Inputs
         {
             void OnMove(InputAction.CallbackContext context);
             void OnJump(InputAction.CallbackContext context);
+            void OnSprint(InputAction.CallbackContext context);
         }
     }
 }
