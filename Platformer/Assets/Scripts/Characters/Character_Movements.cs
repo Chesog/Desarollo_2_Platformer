@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEditor;
 using UnityEngine;
+using System;
 
 public class Character_Movements : MonoBehaviour
 {
@@ -10,7 +11,7 @@ public class Character_Movements : MonoBehaviour
     [Header("SetUp")]
     [SerializeField] Rigidbody rigidbody;
     [SerializeField] Transform feet_Pivot;
-
+    [SerializeField] float jumpBufferTime;
     [Header("Movement")]
     [SerializeField] Vector3 _CurrentMovement;
     [Range (0,500)] [SerializeField] float speed = 20.0f;
@@ -18,7 +19,6 @@ public class Character_Movements : MonoBehaviour
     [Range (0,500)] [SerializeField] float jumpForce = 20.0f;
     [SerializeField] bool canJump;
     [SerializeField] bool isSprinting;
-
     [SerializeField] const float maxDistance = 10f;
     [SerializeField] const float minJumpDistance = 0.5f;
 
@@ -73,6 +73,13 @@ public class Character_Movements : MonoBehaviour
     public void OnJump()
     {
         canJump = true;
+        CancelInvoke(nameof(CancelJump));
+        Invoke(nameof(CancelJump), jumpBufferTime);
+    }
+
+    private void CancelJump() 
+    {
+        canJump = false;
     }
 
     public void OnSprint(InputValue input) 
@@ -84,5 +91,6 @@ public class Character_Movements : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
+        Gizmos.DrawLine(feet_Pivot.position,feet_Pivot.position + Vector3.down * minJumpDistance);
     }
 }

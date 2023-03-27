@@ -270,6 +270,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rigidbody: {fileID: 648244793}
   feet_Pivot: {fileID: 1504710117}
+  jumpBufferTime: 0.15
   _CurrentMovement: {x: 0, y: 0, z: 0}
   speed: 20
   initialSpeed: 20
