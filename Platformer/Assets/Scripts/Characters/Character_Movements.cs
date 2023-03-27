@@ -9,17 +9,17 @@ public class Character_Movements : MonoBehaviour
 
     [Header("SetUp")]
     [SerializeField] Rigidbody rigidbody;
-    [SerializeField] GameObject feet_Pivot;
+    [SerializeField] Transform feet_Pivot;
 
     [Header("Movement")]
     [SerializeField] Vector3 _CurrentMovement;
-    [Range (0,100)] [SerializeField] float speed = 20.0f;
+    [Range (0,500)] [SerializeField] float speed = 20.0f;
     [SerializeField] float initialSpeed;
-    [Range (0,100)] [SerializeField] float jumpForce = 20.0f;
-    [SerializeField] bool canJunp;
+    [Range (0,500)] [SerializeField] float jumpForce = 20.0f;
+    [SerializeField] bool canJump;
     [SerializeField] bool isSprinting;
 
-    [SerializeField] const float maxDistance = 0f;
+    [SerializeField] const float maxDistance = 10f;
     [SerializeField] const float minJumpDistance = 0.5f;
 
     private void Awake()
@@ -30,30 +30,28 @@ public class Character_Movements : MonoBehaviour
             Debug.LogError(message: $"{name}: (logError){nameof(rigidbody)} is null");
         }
 
-        feet_Pivot ??= GetComponent<GameObject>();
+        feet_Pivot ??= GetComponent<Transform>();
         if (!feet_Pivot)
         {
             Debug.LogError(message: $"{name}: (logError){nameof(feet_Pivot)} is null");
         }
 
-        canJunp = true;
+        canJump = false;
         isSprinting = false;
         initialSpeed = speed;
-    }
-
-    private void Update()
-    {
-        transform.Translate(speed * Time.deltaTime * _CurrentMovement);
     }
 
     private void FixedUpdate()
     {
         RaycastHit hit;
-        if (canJunp && Physics.Raycast(feet_Pivot.transform.position,Vector3.down,out hit,maxDistance) && hit.distance <= minJumpDistance) 
+        if (canJump && Physics.Raycast(feet_Pivot.position,Vector3.down,out hit,maxDistance) && hit.distance <= minJumpDistance) 
         {
             rigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            canJunp = false;
+            canJump = false;
+            Debug.Log("Jump");
         }
+
+        rigidbody.velocity = _CurrentMovement * speed + Vector3.up * rigidbody.velocity.y;
 
         if (isSprinting)
         {
@@ -74,7 +72,7 @@ public class Character_Movements : MonoBehaviour
 
     public void OnJump()
     {
-        canJunp = true;   
+        canJump = true;
     }
 
     public void OnSprint(InputValue input) 
