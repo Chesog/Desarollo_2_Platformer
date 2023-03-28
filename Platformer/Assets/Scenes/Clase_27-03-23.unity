@@ -247,7 +247,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 648244786}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 85.5, y: 4, z: 0}
+  m_LocalPosition: {x: 85.5, y: 5.29, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -270,7 +270,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rigidbody: {fileID: 648244793}
   feet_Pivot: {fileID: 1504710117}
-  jumpBufferTime: 0.15
+  playerCamera: {fileID: 1142304209}
+  jumpBufferTime: 0.2
   jumpBufferTimeCounter: 0
   _CurrentMovement: {x: 0, y: 0, z: 0}
   speed: 20
@@ -278,7 +279,7 @@ MonoBehaviour:
   jumpForce: 10
   isJumping: 0
   isSprinting: 0
-  coyoteTime: 1
+  coyoteTime: 0.2
   coyoteTimerCounter: 0
 --- !u!54 &648244793
 Rigidbody:
@@ -456,6 +457,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1142304209}
+  - component: {fileID: 1142304210}
   - component: {fileID: 1142304208}
   - component: {fileID: 1142304207}
   m_Layer: 0
@@ -523,14 +525,31 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1142304206}
-  m_LocalRotation: {x: 0.25552246, y: -0, z: -0, w: 0.96680313}
-  m_LocalPosition: {x: -1.11, y: 3.1, z: -4.43}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.82, z: -3.92}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 648244791}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 29.609, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1142304210
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1142304206}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e81e8d7c5c93f3542916452866668bfb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mouseX: 0
+  mouseY: 0
+  mouseSensitivity: 30
+  xRotation: 0
+  character: {fileID: 648244791}
 --- !u!1 &1504710116
 GameObject:
   m_ObjectHideFlags: 0
@@ -569,6 +588,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 979526730294996154, guid: ebf4fa658719cc746878856edc56f6bc, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 6f7840949d2d96449a4d84add0f65ebd, type: 2}
     - target: {fileID: 979526731228306448, guid: ebf4fa658719cc746878856edc56f6bc, type: 3}
       propertyPath: m_Name
       value: Floor
@@ -617,5 +640,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 979526731374848552, guid: ebf4fa658719cc746878856edc56f6bc, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 6f7840949d2d96449a4d84add0f65ebd, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ebf4fa658719cc746878856edc56f6bc, type: 3}

@@ -11,6 +11,7 @@ public class Character_Movements : MonoBehaviour
     [Header("SetUp")]
     [SerializeField] private Rigidbody rigidbody;
     [SerializeField] private Transform feet_Pivot;
+    [SerializeField] private Transform playerCamera;
     [SerializeField] private float jumpBufferTime = 0.2f;
     [SerializeField] private float jumpBufferTimeCounter;
     [Header("Movement")]
@@ -40,6 +41,12 @@ public class Character_Movements : MonoBehaviour
             Debug.LogError(message: $"{name}: (logError){nameof(feet_Pivot)} is null");
         }
 
+        playerCamera ??= GetComponent<Transform>();
+        if (!feet_Pivot)
+        {
+            Debug.LogError(message: $"{name}: (logError){nameof(playerCamera)} is null");
+        }
+
         isJumping = false;
         isSprinting = false;
         initialSpeed = speed;
@@ -47,7 +54,7 @@ public class Character_Movements : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Debug.Log(isGrounded());
+        //Debug.Log(isGrounded());
 
         if (coyoteTimerCounter > 0f && jumpBufferTimeCounter > 0f && !isJumping) 
         {
@@ -65,7 +72,7 @@ public class Character_Movements : MonoBehaviour
             coyoteTimerCounter -= Time.deltaTime;
         }
 
-        rigidbody.velocity = _CurrentMovement * speed + Vector3.up * rigidbody.velocity.y;
+        rigidbody.velocity = _CurrentMovement.normalized * speed + Vector3.up * rigidbody.velocity.y;
 
         if (isSprinting)
         {
@@ -80,8 +87,9 @@ public class Character_Movements : MonoBehaviour
     public void OnMove(InputValue input)
     {
         var movement = input.Get<Vector2>();
-        _CurrentMovement.x = movement.x;
-        _CurrentMovement.z = movement.y;
+
+        float targetAngle = Mathf.Atan2(movement.x, movement.y) * Mathf.Rad2Deg + playerCamera.eulerAngles.y;
+        _CurrentMovement = Quaternion.Euler(0f, targetAngle,0f) * Vector3.forward;
     }
 
     public void OnJump(InputValue input)
