@@ -9,18 +9,22 @@ public class Character_Movements : MonoBehaviour
 {
 
     [Header("SetUp")]
-    [SerializeField] Rigidbody rigidbody;
-    [SerializeField] Transform feet_Pivot;
-    [SerializeField] float jumpBufferTime;
+    [SerializeField] private Rigidbody rigidbody;
+    [SerializeField] private Transform feet_Pivot;
+    [SerializeField] private float jumpBufferTime = 0.2f;
+    [SerializeField] private float jumpBufferTimeCounter;
     [Header("Movement")]
     [SerializeField] Vector3 _CurrentMovement;
-    [Range (0,500)] [SerializeField] float speed = 20.0f;
+    [Range (0,500)] [SerializeField] private float speed = 20.0f;
     [SerializeField] float initialSpeed;
-    [Range (0,500)] [SerializeField] float jumpForce = 20.0f;
-    [SerializeField] bool canJump;
-    [SerializeField] bool isSprinting;
+    [Range (0,500)] [SerializeField] private float jumpForce = 20.0f;
+    [SerializeField] private bool isJumping;
+    [SerializeField] private bool isSprinting;
     [SerializeField] const float maxDistance = 10f;
     [SerializeField] const float minJumpDistance = 0.5f;
+    [Header("Coyote Time Setup")]
+    [SerializeField] private float coyoteTime = 0.2f;
+    [SerializeField] private float coyoteTimerCounter;
 
     private void Awake()
     {
@@ -36,19 +40,29 @@ public class Character_Movements : MonoBehaviour
             Debug.LogError(message: $"{name}: (logError){nameof(feet_Pivot)} is null");
         }
 
-        canJump = false;
+        isJumping = false;
         isSprinting = false;
         initialSpeed = speed;
     }
 
     private void FixedUpdate()
     {
-        RaycastHit hit;
-        if (canJump && Physics.Raycast(feet_Pivot.position,Vector3.down,out hit,maxDistance) && hit.distance <= minJumpDistance) 
+        Debug.Log(isGrounded());
+
+        if (coyoteTimerCounter > 0f && jumpBufferTimeCounter > 0f && !isJumping) 
         {
             rigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            canJump = false;
-            Debug.Log("Jump");
+            isJumping = true;
+            //Debug.Log("Jump");
+        }
+
+        if (isGrounded())
+        {
+            coyoteTimerCounter = coyoteTime;
+        }
+        else
+        {
+            coyoteTimerCounter -= Time.deltaTime;
         }
 
         rigidbody.velocity = _CurrentMovement * speed + Vector3.up * rigidbody.velocity.y;
@@ -70,16 +84,38 @@ public class Character_Movements : MonoBehaviour
         _CurrentMovement.z = movement.y;
     }
 
-    public void OnJump()
+    public void OnJump(InputValue input)
     {
-        canJump = true;
+        isJumping = true;
+        if (input.isPressed)
+        {
+            jumpBufferTimeCounter = jumpBufferTime;
+        }
+        else
+        {
+            jumpBufferTimeCounter -= Time.deltaTime;
+            coyoteTimerCounter = 0.0f;
+        }
+
+        if (input.isPressed && rigidbody.velocity.y > 0f)
+        {
+            rigidbody.velocity = _CurrentMovement * speed + Vector3.up * rigidbody.velocity.y * 0.5f;
+            coyoteTimerCounter = 0f;
+        }
+
         CancelInvoke(nameof(CancelJump));
         Invoke(nameof(CancelJump), jumpBufferTime);
     }
 
+    private bool isGrounded() 
+    {
+        RaycastHit hit;
+        return Physics.Raycast(feet_Pivot.position, Vector3.down, out hit, maxDistance) && hit.distance <= minJumpDistance;
+    }
+
     private void CancelJump() 
     {
-        canJump = false;
+        isJumping = false;
     }
 
     public void OnSprint(InputValue input) 
