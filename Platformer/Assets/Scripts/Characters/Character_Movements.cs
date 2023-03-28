@@ -14,6 +14,8 @@ public class Character_Movements : MonoBehaviour
     [SerializeField] private Transform playerCamera;
     [SerializeField] private float jumpBufferTime = 0.2f;
     [SerializeField] private float jumpBufferTimeCounter;
+    [SerializeField] private float turnSmoothTime = 0.1f;
+    [SerializeField] private float turnSmoothVelocity;
     [Header("Movement")]
     [SerializeField] Vector3 _CurrentMovement;
     [Range (0,500)] [SerializeField] private float speed = 20.0f;
@@ -72,7 +74,15 @@ public class Character_Movements : MonoBehaviour
             coyoteTimerCounter -= Time.deltaTime;
         }
 
-        rigidbody.velocity = _CurrentMovement.normalized * speed + Vector3.up * rigidbody.velocity.y;
+        if (_CurrentMovement.magnitude >= 0.1f)
+        {
+            float targetAngle = Mathf.Atan2(_CurrentMovement.x, _CurrentMovement.z) * Mathf.Rad2Deg + playerCamera.eulerAngles.y;
+            //float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y,targetAngle,ref turnSmoothVelocity,turnSmoothTime);
+            //transform.rotation = Quaternion.Euler(0f,angle,0f);
+
+            Vector3 moveDir = Quaternion.Euler(0f,targetAngle,0f) * Vector3.forward;
+            rigidbody.velocity = moveDir.normalized * speed + Vector3.up * rigidbody.velocity.y;
+        }
 
         if (isSprinting)
         {
@@ -87,9 +97,7 @@ public class Character_Movements : MonoBehaviour
     public void OnMove(InputValue input)
     {
         var movement = input.Get<Vector2>();
-
-        float targetAngle = Mathf.Atan2(movement.x, movement.y) * Mathf.Rad2Deg + playerCamera.eulerAngles.y;
-        _CurrentMovement = Quaternion.Euler(0f, targetAngle,0f) * Vector3.forward;
+        _CurrentMovement = new Vector3(movement.x,0f,movement.y).normalized;
     }
 
     public void OnJump(InputValue input)
