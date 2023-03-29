@@ -4,6 +4,8 @@ using UnityEngine.InputSystem;
 using UnityEditor;
 using UnityEngine;
 using System;
+using UnityEngine.Windows;
+using Unity.VisualScripting;
 
 public class Character_Movements : MonoBehaviour
 {
@@ -16,11 +18,12 @@ public class Character_Movements : MonoBehaviour
     [SerializeField] private float jumpBufferTimeCounter;
     [SerializeField] private float turnSmoothTime = 0.1f;
     [SerializeField] private float turnSmoothVelocity;
+    private Coroutine _jumpCorutine;
     [Header("Movement")]
     [SerializeField] Vector3 _CurrentMovement;
-    [Range (0,500)] [SerializeField] private float speed = 20.0f;
+    [Range(0, 500)][SerializeField] private float speed = 20.0f;
     [SerializeField] float initialSpeed;
-    [Range (0,500)] [SerializeField] private float jumpForce = 20.0f;
+    [Range(0, 500)][SerializeField] private float jumpForce = 20.0f;
     [SerializeField] private bool isJumping;
     [SerializeField] private bool isSprinting;
     [SerializeField] const float maxDistance = 10f;
@@ -35,6 +38,7 @@ public class Character_Movements : MonoBehaviour
         if (!rigidbody)
         {
             Debug.LogError(message: $"{name}: (logError){nameof(rigidbody)} is null");
+            enabled = false;
         }
 
         feet_Pivot ??= GetComponent<Transform>();
@@ -58,13 +62,6 @@ public class Character_Movements : MonoBehaviour
     {
         //Debug.Log(isGrounded());
 
-        if (coyoteTimerCounter > 0f && jumpBufferTimeCounter > 0f && !isJumping) 
-        {
-            rigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            isJumping = true;
-            //Debug.Log("Jump");
-        }
-
         if (isGrounded())
         {
             coyoteTimerCounter = coyoteTime;
@@ -74,21 +71,34 @@ public class Character_Movements : MonoBehaviour
             coyoteTimerCounter -= Time.deltaTime;
         }
 
-        if (_CurrentMovement.magnitude >= 0.1f)
+        if (isGrounded())
         {
-            float targetAngle = Mathf.Atan2(_CurrentMovement.x, _CurrentMovement.z) * Mathf.Rad2Deg + playerCamera.eulerAngles.y;
-            //float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y,targetAngle,ref turnSmoothVelocity,turnSmoothTime);
-            //transform.rotation = Quaternion.Euler(0f,angle,0f);
-
-            Vector3 moveDir = Quaternion.Euler(0f,targetAngle,0f) * Vector3.forward;
-            rigidbody.velocity = moveDir.normalized * speed + Vector3.up * rigidbody.velocity.y;
+            jumpBufferTimeCounter = jumpBufferTime;
         }
+        else
+        {
+            jumpBufferTimeCounter -= Time.deltaTime;
+            //coyoteTimerCounter = 0.0f;
+        }
+
+        // To Fix
+        
+        //if (_CurrentMovement.magnitude >= 1f)
+        //{
+        //    float targetAngle = Mathf.Atan2(_CurrentMovement.x, _CurrentMovement.z) * Mathf.Rad2Deg + playerCamera.eulerAngles.y;
+        //
+        //
+        //    Vector3 moveDir = Quaternion.Euler(0f,targetAngle,0f) * Vector3.forward;
+        //    rigidbody.velocity = moveDir.normalized * speed + Vector3.up * rigidbody.velocity.y;
+        //}
+
+        rigidbody.velocity = _CurrentMovement * speed + Vector3.up * rigidbody.velocity.y;
 
         if (isSprinting)
         {
             speed = initialSpeed * 2;
         }
-        else 
+        else
         {
             speed = initialSpeed;
         }
@@ -97,44 +107,58 @@ public class Character_Movements : MonoBehaviour
     public void OnMove(InputValue input)
     {
         var movement = input.Get<Vector2>();
-        _CurrentMovement = new Vector3(movement.x,0f,movement.y).normalized;
+        _CurrentMovement = new Vector3(movement.x, 0f, movement.y);
     }
 
     public void OnJump(InputValue input)
     {
-        isJumping = true;
-        if (input.isPressed)
-        {
-            jumpBufferTimeCounter = jumpBufferTime;
-        }
-        else
-        {
-            jumpBufferTimeCounter -= Time.deltaTime;
-            coyoteTimerCounter = 0.0f;
-        }
+        if (_jumpCorutine != null)
+            StopCoroutine(_jumpCorutine);
+        _jumpCorutine = StartCoroutine(JumpCorutine(jumpBufferTime));
 
+        StopCoroutine(JumpCorutine(jumpBufferTime));
         if (input.isPressed && rigidbody.velocity.y > 0f)
         {
-            rigidbody.velocity = _CurrentMovement * speed + Vector3.up * rigidbody.velocity.y * 0.5f;
+           rigidbody.velocity = _CurrentMovement * speed + Vector3.up * rigidbody.velocity.y * 0.5f;
             coyoteTimerCounter = 0f;
         }
-
-        CancelInvoke(nameof(CancelJump));
-        Invoke(nameof(CancelJump), jumpBufferTime);
     }
 
-    private bool isGrounded() 
+    private IEnumerator JumpCorutine(float bufferTime)
     {
-        RaycastHit hit;
-        return Physics.Raycast(feet_Pivot.position, Vector3.down, out hit, maxDistance) && hit.distance <= minJumpDistance;
+        if (!feet_Pivot)
+        {
+            yield break;
+        }
+
+        float timeElapsed = 0;
+
+        while (timeElapsed <= bufferTime)
+        {
+            yield return new WaitForFixedUpdate();
+
+            if (coyoteTimerCounter > 0f && jumpBufferTimeCounter > 0f && !isJumping)
+            {
+                rigidbody.velocity = new Vector3(rigidbody.velocity.x, 0f, rigidbody.velocity.z);
+                rigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+                if (timeElapsed > 0) 
+                {
+                    Debug.Log(message: $"{name}: buffer jump for {timeElapsed} seconds");
+                }
+                yield break;
+                
+            }
+
+            timeElapsed += Time.fixedDeltaTime;
+        }
     }
 
-    private void CancelJump() 
+    private bool isGrounded()
     {
-        isJumping = false;
+        return Physics.Raycast(feet_Pivot.position, Vector3.down, out var hit, maxDistance) && hit.distance <= minJumpDistance;
     }
 
-    public void OnSprint(InputValue input) 
+    public void OnSprint(InputValue input)
     {
         Debug.Log(input.isPressed);
         isSprinting = input.isPressed;
@@ -143,6 +167,6 @@ public class Character_Movements : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
-        Gizmos.DrawLine(feet_Pivot.position,feet_Pivot.position + Vector3.down * minJumpDistance);
+        Gizmos.DrawLine(feet_Pivot.position, feet_Pivot.position + Vector3.down * minJumpDistance);
     }
 }

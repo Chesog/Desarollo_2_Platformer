@@ -271,8 +271,10 @@ MonoBehaviour:
   rigidbody: {fileID: 648244793}
   feet_Pivot: {fileID: 1504710117}
   playerCamera: {fileID: 1142304209}
-  jumpBufferTime: 0.5
+  jumpBufferTime: 1
   jumpBufferTimeCounter: 0
+  turnSmoothTime: 0.1
+  turnSmoothVelocity: 0
   _CurrentMovement: {x: 0, y: 0, z: 0}
   speed: 20
   initialSpeed: 20
@@ -547,7 +549,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mouseX: 0
   mouseY: 0
-  mouseSensitivity: 50
+  mouseSensitivity: 100
   xRotation: 0
   character: {fileID: 648244791}
 --- !u!1 &1504710116
