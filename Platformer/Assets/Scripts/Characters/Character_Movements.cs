@@ -80,19 +80,18 @@ public class Character_Movements : MonoBehaviour
             jumpBufferTimeCounter -= Time.deltaTime;
             //coyoteTimerCounter = 0.0f;
         }
-
-        // To Fix
         
-        //if (_CurrentMovement.magnitude >= 1f)
-        //{
-        //    float targetAngle = Mathf.Atan2(_CurrentMovement.x, _CurrentMovement.z) * Mathf.Rad2Deg + playerCamera.eulerAngles.y;
-        //
-        //
-        //    Vector3 moveDir = Quaternion.Euler(0f,targetAngle,0f) * Vector3.forward;
-        //    rigidbody.velocity = moveDir.normalized * speed + Vector3.up * rigidbody.velocity.y;
-        //}
-
-        rigidbody.velocity = _CurrentMovement * speed + Vector3.up * rigidbody.velocity.y;
+        if (_CurrentMovement.magnitude >= 1f)
+        {
+            float targetAngle = Mathf.Atan2(_CurrentMovement.x, _CurrentMovement.z) * Mathf.Rad2Deg + playerCamera.eulerAngles.y;
+        
+            Vector3 moveDir = Quaternion.Euler(0f,targetAngle,0f) * Vector3.forward;
+            rigidbody.velocity = moveDir.normalized * speed + Vector3.up * rigidbody.velocity.y;
+        }
+        else
+        {
+            rigidbody.velocity = new Vector3(0f,rigidbody.velocity.y, 0f);
+        }
 
         if (isSprinting)
         {
